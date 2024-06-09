@@ -1,0 +1,17 @@
+body {
+    background-color: black;
+}
+.text {
+    color: white;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+.text img {
+    width: 10em;
+    height: 10em;
+}

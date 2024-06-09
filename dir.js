@@ -1,36 +1,60 @@
-const http = require('http');
-const path = require('path');
-const fs = require('fs');
-const fsPromises = require('fs').promises;
+const express = require("express");
+const app = express()
+const path = require("path");
+const cors = require('cors');
+const {logger} = require('./middleware/App');
+const PORT = process.env.PORT || 3500;
 
-const logEvents = require('./App');
-const EventEmitter = require('events');
-class Emitter extends EventEmitter {}; 
+app.use(logger);
+const whitelist = ['https://www.yoursite.com', 'http://127.0.0.1:5500']
+app.use(cors());
 
-const MyEmitter = new Emitter();
-
-const PORT = process.env.PORT || 3000;
-
-const server = http.createServer((req, res) => {
-    console.log(req.url, req.method);
-
-    let path;
-
-    if (req.url === '/' || req.url === 'index.html'){
-        res.statusCode =200 ;
-        res.setHeader('Content-type', 'text/html');
-        path = path.join(__dirname, 'views', 'index.html')
-        fs.readFileSync(path, 'utf8',(err , data) => {
-            res.end(data);
-        });
-    }
-});
-
-server.listen(PORT, ()=> console.log(
-    `Server running on port ${PORT}`
-));
+app.use(express.urlencoded({ extended: false}));
 
 
-// MyEmitter.on('log', (msg) => logEvents(msg));
+app.use(express.json())
 
-//     MyEmitter.emit('log', 'log event emitted!');
+app.use(express.static(path.join(__dirname, '/public')));
+app.get('^/$|/index(.html)?', (req, res)=> {
+  // res.sendFile('./views/index.html', {root: __dirname});
+  res.sendFile(path.join(__dirname, 'views', 'index.html'));
+})
+
+app.get('/new-page(.html)?', (req, res)=> {
+  res.sendFile(path.join(__dirname, 'views', 'new-page.html'));
+})
+
+app.get('/old-page(.html)?', (req, res)=> {
+  res.redirect(301, '/new-page.html');
+})
+
+app.get('/hello(.html)?', (req, res, next) =>{
+  console.log('attempted to load hello.html');
+  next()
+}, (req, res) =>{
+  res.send('hello world!')
+})
+
+
+const one = (req, res, next) => {
+  console.log('one');
+  next()
+}
+
+const two =(req, res, next)=>{
+  console.log('two');
+  next()
+}
+
+const three = (req, res) => {
+  console.log('three');
+  res.send('finished!')
+}
+
+app.get('/chain(.html)?', [one, two, three]);
+
+app.get('/*', (req, res) => {
+  res.status(404).sendFile(path.join(__dirname, 'views', '404.html'));
+})
+
+app .listen(PORT, () => console.log(`Server running on port ${PORT}`));

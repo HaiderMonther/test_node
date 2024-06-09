@@ -1,0 +1,16 @@
+[
+  {
+    "username": "user1",
+    "password": "951629",
+    "active": false,
+    "full_name": "null",
+    "birthday": "null",
+    "phone_number": "null",
+    "degree": "null",
+    "work": "null",
+    "previous_teacher": false,
+    "image_1": "null",
+    "image_2": "null",
+    "update": false
+}
+]
